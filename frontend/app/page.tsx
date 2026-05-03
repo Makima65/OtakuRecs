@@ -148,7 +148,7 @@ export default function Home() {
     setApiError(null); 
     
     try {
-      let aiUrl = `http://localhost:8000/recommend?vibe=${encodeURIComponent(vibe)}&safe_search=${safeSearch}&min_score=${minScore}`;
+      let aiUrl = `${process.env.NEXT_PUBLIC_API_URL}/recommend?vibe=${encodeURIComponent(vibe)}&safe_search=${safeSearch}&min_score=${minScore}`;
       if (selectedGenres.length > 0) aiUrl += `&genres=${selectedGenres.join(',')}`;
       if (animeType) aiUrl += `&type=${animeType}`;
       if (animeStatus) aiUrl += `&status=${animeStatus}`;
