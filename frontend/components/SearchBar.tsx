@@ -78,7 +78,7 @@ export default function SearchBar({
             className="flex-1 sm:flex-none inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#24B47E] px-4 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1E9A6A] border border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3ECF8E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1C1C1C] disabled:pointer-events-none disabled:opacity-50"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Sparkles className="h-4 w-4" />}
-            <span>AI Vibe</span>
+            <span>Vibe Search</span>
           </button>
         </div>
       </div>
