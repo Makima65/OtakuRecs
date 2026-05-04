@@ -7,7 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { 
   ArrowLeft, ExternalLink, Star, PlayCircle, Calendar, 
   Clock, Heart, X, Bookmark, Check, ListPlus, Pencil, Users, ThumbsUp, Link as LinkIcon,
-  MessageCircle, HeartCrack, Send, LogIn, Trash2, AlertTriangle, MoreVertical
+  MessageCircle, HeartCrack, Send, LogIn, Trash2, AlertTriangle, MoreVertical, BarChart2
 } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client'; 
@@ -173,6 +173,7 @@ export default function AnimeDetails() {
   const [activeTab, setActiveTab] = useState<'status' | 'lists'>('status');
   const [watchStatus, setWatchStatus] = useState("Want to Watch");
   const [listName, setListName] = useState("My List");
+  const [animeStats, setAnimeStats] = useState({ watched: 0, watching: 0, wantToWatch: 0, dropped: 0, total: 0 });
 
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState("");
@@ -251,7 +252,25 @@ export default function AnimeDetails() {
           .order('created_at', { ascending: false });
           
         if (commentsData && isMounted) setComments(commentsData);
+// ==========================================
+        // ADD STEP 2 RIGHT HERE:
+        // Fetch Community Stats
+        const { data: statsData } = await supabase
+          .from('user_anime_list')
+          .select('watch_status')
+          .eq('anime_id', String(id));
 
+        if (statsData && isMounted) {
+          const stats = { watched: 0, watching: 0, wantToWatch: 0, dropped: 0, total: statsData.length };
+          statsData.forEach((item) => {
+            if (item.watch_status === "Watched") stats.watched++;
+            else if (item.watch_status === "Watching") stats.watching++;
+            else if (item.watch_status === "Want to Watch") stats.wantToWatch++;
+            else if (item.watch_status === "Dropped") stats.dropped++;
+          });
+          setAnimeStats(stats);
+        }
+        // ==========================================
         if (activeUser) {
           const { data: savedData } = await supabase
             .from('user_anime_list')
@@ -526,7 +545,43 @@ export default function AnimeDetails() {
                 </span>
               </div>
             </div>
-          </div>
+
+            {/* Stats box is now SAFELY INSIDE the left column container! */}
+            {animeStats.total > 0 && (
+              <div className="bg-[#11181C] border border-[#2E2E2E] rounded-xl p-5 flex flex-col gap-4">
+                <div className="flex items-center gap-2 text-[#EDEDED] font-bold pb-2 border-b border-[#2E2E2E]">
+                  <BarChart2 className="w-4 h-4 text-[#3ECF8E]" /> Community Status
+                </div>
+                <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                    <span className="text-[#A0A0A0] flex-1">Watched</span>
+                    <span className="text-[#EDEDED] font-bold">{animeStats.watched}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#3ECF8E]" />
+                    <span className="text-[#A0A0A0] flex-1">Watching</span>
+                    <span className="text-[#EDEDED] font-bold">{animeStats.watching}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+                    <span className="text-[#A0A0A0] flex-1 truncate text-xs sm:text-sm">Plan to Watch</span>
+                    <span className="text-[#EDEDED] font-bold">{animeStats.wantToWatch}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                    <span className="text-[#A0A0A0] flex-1">Dropped</span>
+                    <span className="text-[#EDEDED] font-bold">{animeStats.dropped}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+          </div> {/* <--- This is the left sidebar closing div */}
+          
+          {/* ... the rest of the right-hand column (title, synopsis) continues below ... */}
+          
+          
 
           <div className="flex flex-col gap-8">
             <div>
@@ -716,11 +771,11 @@ export default function AnimeDetails() {
             {comments.length > 0 ? (
               comments.map((comment) => (
                 <div key={comment.id} className="flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-[#282828] border border-[#2E2E2E] flex items-center justify-center shrink-0">
-                    <span className="text-[#A0A0A0] font-bold text-sm uppercase">
-                      {comment.user_email ? comment.user_email[0] : 'U'}
-                    </span>
-                  </div>
+<Link href={`/profile/${comment.user_id}`} className="w-10 h-10 rounded-full bg-[#282828] border border-[#2E2E2E] flex items-center justify-center shrink-0 hover:border-[#3ECF8E] transition-colors group">
+  <span className="text-[#A0A0A0] font-bold text-sm uppercase group-hover:text-[#3ECF8E] transition-colors">
+    {comment.user_email ? comment.user_email[0] : 'U'}
+  </span>
+</Link>
                   <div className="flex-1 bg-[#282828] border border-[#2E2E2E] rounded-lg p-4">
                     
                     <div className="flex items-center justify-between mb-2">

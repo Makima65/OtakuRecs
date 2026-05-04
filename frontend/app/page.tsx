@@ -340,7 +340,7 @@ export default function Home() {
           <h3 className="text-sm font-medium text-[#EDEDED] flex items-center gap-2 uppercase tracking-wider">
             <LayoutGrid className="w-4 h-4 text-[#8B909A]" />
             {searchMode === 'ai' 
-              ? "AI Vibe Matches" 
+              ? "Vibe Matches" 
               : searchMode === 'title' 
                 ? `Results for "${vibe}" (Page ${currentPage})`
                 : `Browse Anime (Page ${currentPage})`}
