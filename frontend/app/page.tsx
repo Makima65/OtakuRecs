@@ -72,15 +72,18 @@ export default function Home() {
       if (animeType) url += `&type=${animeType}`;
       if (animeStatus) url += `&status=${animeStatus}`;
       
-      if (sortBy === "members") {
-        url += `&order_by=members&sort=desc`;
-      } else if (sortBy === "score") {
-        url += `&order_by=score&sort=desc`;
-      } else if (sortBy === "title") {
-        url += `&order_by=title&sort=asc`;
-      } else if (sortBy === "year") {
-        const today = new Date().toISOString().split('T')[0];
-        url += `&order_by=start_date&sort=desc&end_date=${today}`;
+// Only apply sorting if we are browsing. If searching by title, let Jikan sort by exact relevance!
+      if (searchMode !== 'title') {
+        if (sortBy === "members") {
+          url += `&order_by=members&sort=desc`;
+        } else if (sortBy === "score") {
+          url += `&order_by=score&sort=desc`;
+        } else if (sortBy === "title") {
+          url += `&order_by=title&sort=asc`;
+        } else if (sortBy === "year") {
+          const today = new Date().toISOString().split('T')[0];
+          url += `&order_by=start_date&sort=desc&end_date=${today}`;
+        }
       }
 
       const res = await fetch(url);
@@ -260,14 +263,15 @@ export default function Home() {
                       <option value="upcoming">Upcoming</option>
                     </select>
                   </div>
-                  <div>
+<div>
                     <label className="block text-xs font-medium text-[#8B909A] mb-1.5 uppercase tracking-wider">Sort By</label>
                     <select 
-                      value={sortBy}
+                      value={searchMode === 'title' ? 'relevance' : sortBy}
                       onChange={handleFilterChange(setSortBy)}
                       className="h-10 bg-[#2A2A2A] border border-[#3E3E3E] text-[#EDEDED] text-sm rounded-md focus:ring-[#3ECF8E] focus:border-[#3ECF8E] block w-full px-3 py-2 cursor-pointer outline-none transition-colors hover:border-[#555] disabled:opacity-50"
-                      disabled={searchMode === 'ai'}
+                      disabled={searchMode === 'ai' || searchMode === 'title'}
                     >
+                      {searchMode === 'title' && <option value="relevance">Relevance</option>}
                       <option value="members">Popular</option>
                       <option value="score">Highest Rated</option>
                       <option value="year">Newest First</option>
