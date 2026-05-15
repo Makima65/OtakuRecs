@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-// 1. Import your Navbar! 
-// (Make sure this path matches exactly where your Navbar file is saved)
+// 1. Import your Navbar and Footer! 
 import Navbar from "@/components/Navbar"; 
+import Footer from "@/components/Footer"; // <-- NEW: Imported the Footer
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,6 +41,9 @@ export default function RootLayout({
         <main className="flex-1">
           {children}
         </main>
+        
+        {/* 5. The Footer goes at the very bottom! */}
+        <Footer />
         
       </body>
     </html>
