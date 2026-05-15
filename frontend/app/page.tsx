@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import SearchBar from '@/components/SearchBar';
 import AnimeCard from '@/components/AnimeCard';
-
 import { LayoutGrid, ChevronLeft, ChevronRight } from "lucide-react"; 
 
 const POPULAR_GENRES = [
@@ -19,6 +18,38 @@ const POPULAR_GENRES = [
   { id: 30, name: "Sports" },
   { id: 37, name: "Supernatural" },
 ];
+
+const ALL_GENRES = [
+  ...POPULAR_GENRES,
+  { id: 5, name: "Avant Garde" },
+  { id: 46, name: "Award Winning" },
+  { id: 28, name: "Boys Love" },
+  { id: 26, name: "Girls Love" },
+  { id: 47, name: "Gourmet" },
+  { id: 41, name: "Suspense" },
+  { id: 9, name: "Ecchi" },
+  { id: 62, name: "Isekai" },
+  { id: 63, name: "Iyashikei" },
+  { id: 18, name: "Mecha" },
+  { id: 19, name: "Music" },
+  { id: 40, name: "Psychological" },
+  { id: 23, name: "School" },
+  { id: 13, name: "Historical" },
+  { id: 38, name: "Military" },
+  { id: 31, name: "Super Power" },
+  { id: 29, name: "Space" },
+  { id: 32, name: "Vampire" },
+  { id: 35, name: "Harem" },
+  { id: 73, name: "Reverse Harem" },
+  { id: 78, name: "Time Travel" },
+  { id: 72, name: "Reincarnation" },
+  { id: 80, name: "Villainess" },
+  { id: 53, name: "Childcare" },
+  { id: 79, name: "Video Game" },
+  { id: 48, name: "Workplace" },
+];
+// Sort the expanded list alphabetically so it's easy for users to read!
+ALL_GENRES.sort((a, b) => a.name.localeCompare(b.name));
 
 export default function Home() {
   const [vibe, setVibe] = useState('');
@@ -38,6 +69,7 @@ export default function Home() {
   const [safeSearch, setSafeSearch] = useState(true);
   const [minScore, setMinScore] = useState(5.0);
   const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
+  const [showAllGenres, setShowAllGenres] = useState(false);
   const [animeType, setAnimeType] = useState('');
   const [animeStatus, setAnimeStatus] = useState('');
 
@@ -72,7 +104,7 @@ export default function Home() {
       if (animeType) url += `&type=${animeType}`;
       if (animeStatus) url += `&status=${animeStatus}`;
       
-// Only apply sorting if we are browsing. If searching by title, let Jikan sort by exact relevance!
+      // Only apply sorting if we are browsing. If searching by title, let Jikan sort by exact relevance!
       if (searchMode !== 'title') {
         if (sortBy === "members") {
           url += `&order_by=members&sort=desc`;
@@ -263,7 +295,7 @@ export default function Home() {
                       <option value="upcoming">Upcoming</option>
                     </select>
                   </div>
-<div>
+                  <div>
                     <label className="block text-xs font-medium text-[#8B909A] mb-1.5 uppercase tracking-wider">Sort By</label>
                     <select 
                       value={searchMode === 'title' ? 'relevance' : sortBy}
@@ -281,9 +313,11 @@ export default function Home() {
                 </div>
 
                 <div className="pt-4 border-t border-[#2E2E2E]">
-                  <h4 className="text-xs font-medium text-[#8B909A] mb-2 uppercase tracking-wider">Genres</h4>
+                  <h4 className="text-xs font-medium text-[#8B909A] mb-2 uppercase tracking-wider">Genres & Themes</h4>
                   <div className="flex flex-wrap gap-2">
-                    {POPULAR_GENRES.map((genre) => (
+                    
+                    {/* Dynamically render either Popular or All based on state */}
+                    {(showAllGenres ? ALL_GENRES : POPULAR_GENRES).map((genre) => (
                       <button
                         key={genre.id}
                         onClick={() => toggleGenre(genre.id)}
@@ -296,6 +330,15 @@ export default function Home() {
                         {genre.name}
                       </button>
                     ))}
+
+                    {/* The Toggle Button */}
+                    <button
+                      onClick={() => setShowAllGenres(!showAllGenres)}
+                      className="px-3 py-1.5 text-xs font-medium rounded-md border border-dashed border-[#3E3E3E] bg-transparent text-[#8B909A] hover:border-[#3ECF8E] hover:text-[#3ECF8E] transition-colors"
+                    >
+                      {showAllGenres ? "− See Less" : "+ See More"}
+                    </button>
+
                   </div>
                 </div>
 
