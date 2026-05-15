@@ -12,14 +12,14 @@ export default function Navbar({ onReset }: NavbarProps) {
     <header className="sticky top-0 z-50 w-full border-b border-[#2E2E2E] bg-[#111111]/80 backdrop-blur supports-[backdrop-filter]:bg-[#111111]/60">
       <div className="max-w-5xl mx-auto flex h-16 items-center justify-between px-6">
         
-        {/* Logo */}
-        <div 
-          className="flex items-center gap-2 font-bold text-xl tracking-tight text-[#EDEDED] hover:text-[#3ECF8E] transition-colors cursor-pointer" 
+{/* Logo */}
+        <Link 
+          href="/"
+          className="flex items-center gap-2 font-bold text-xl tracking-tight text-[#EDEDED] hover:text-[#3ECF8E] transition-colors" 
           onClick={onReset}
         >
-          
           OtakuRecs
-        </div>
+        </Link>
 
         {/* Right Navigation */}
         <div className="flex items-center gap-6">
