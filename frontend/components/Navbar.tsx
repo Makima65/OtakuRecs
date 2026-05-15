@@ -17,7 +17,7 @@ export default function Navbar({ onReset }: NavbarProps) {
           className="flex items-center gap-2 font-bold text-xl tracking-tight text-[#EDEDED] hover:text-[#3ECF8E] transition-colors cursor-pointer" 
           onClick={onReset}
         >
-          <Sparkles className="h-5 w-5 text-[#3ECF8E]" />
+          
           OtakuRecs
         </div>
 
