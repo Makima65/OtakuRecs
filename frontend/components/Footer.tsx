@@ -124,14 +124,14 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Legal Links */}
+{/* Legal Links */}
           <div className="col-span-1 md:col-span-2">
             <h3 className="text-[#EDEDED] font-semibold text-sm mb-5 uppercase tracking-wider">Legal</h3>
             <ul className="space-y-3">
               <li><Link href="#" className="text-[#8B909A] hover:text-[#EDEDED] text-sm transition-colors">Terms of Service</Link></li>
               <li><Link href="#" className="text-[#8B909A] hover:text-[#EDEDED] text-sm transition-colors">Privacy Policy</Link></li>
               <li><Link href="#" className="text-[#8B909A] hover:text-[#EDEDED] text-sm transition-colors">Cookie Policy</Link></li>
-              <li><Link href="#" className="text-[#8B909A] hover:text-[#EDEDED] text-sm transition-colors">Contact Us</Link></li>
+              <li><a href="mailto:your.email@gmail.com" className="text-[#8B909A] hover:text-[#EDEDED] text-sm transition-colors">Contact Us</a></li>
             </ul>
           </div>
 
