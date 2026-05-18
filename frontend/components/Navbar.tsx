@@ -34,7 +34,7 @@ export default function Navbar({ onReset }: NavbarProps) {
 
           {/* Text Design - Now responsive! Smaller on mobile (text-xl), bigger on desktop (sm:text-2xl) */}
           <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-[#3ECF8E] transition-all duration-300">
-            OTAKURECS
+            OtakuRecs
           </span>
         </Link>
 

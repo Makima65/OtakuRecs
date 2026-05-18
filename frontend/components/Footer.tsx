@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Heart, Sparkles } from "lucide-react";
 import { SiDiscord } from "react-icons/si";
 
@@ -11,10 +12,36 @@ export default function Footer() {
           
           {/* Brand & Mission */}
           <div className="col-span-1 md:col-span-5 flex flex-col items-start">
-            <Link href="/" className="text-2xl font-bold text-[#EDEDED] flex items-center gap-2 mb-4 group">
-              OtakuRecs 
-              <Sparkles className="w-5 h-5 text-[#3ECF8E] group-hover:text-white transition-colors" />
+            
+            {/* New Logo + Brand Group */}
+            <Link href="/" className="flex items-center gap-4 mb-6 group w-fit">
+              {/* HD Logo Image */}
+              <div className="flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <Image 
+                  src="/otaku_logo2.png" 
+                  alt="OtakuRecs Logo"
+                  width={56} 
+                  height={56}
+                  className="object-contain"
+                  quality={100}
+                />
+              </div>
+              
+              {/* Stacked Text Layout */}
+              <div className="flex flex-col justify-center">
+                <div className="flex items-center gap-1.5">
+                  {/* Standard Casing as requested, with green styling */}
+                  <span className="text-3xl font-extrabold text-[#3ECF8E] tracking-tight transition-colors">
+                    OtakuRecs
+                  </span>
+                  <Sparkles className="w-5 h-5 text-[#3ECF8E] group-hover:text-white transition-colors mt-1" />
+                </div>
+                <span className="text-xs font-bold tracking-[0.25em] text-[#EDEDED] mt-0.5">
+                  SINCE 2026
+                </span>
+              </div>
             </Link>
+
             <p className="text-[#8B909A] text-sm leading-relaxed max-w-sm mb-6">
               The ultimate AI-powered anime recommendation engine. Stop endlessly scrolling through databases and let our hybrid AI find your next obsession in seconds.
             </p>
@@ -124,7 +151,7 @@ export default function Footer() {
             </ul>
           </div>
 
-{/* Legal Links */}
+          {/* Legal Links */}
           <div className="col-span-1 md:col-span-2">
             <h3 className="text-[#EDEDED] font-semibold text-sm mb-5 uppercase tracking-wider">Legal</h3>
             <ul className="space-y-3">
