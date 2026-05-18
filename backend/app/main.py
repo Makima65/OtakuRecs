@@ -202,12 +202,13 @@ async def get_recommendations(
     try:
         vibe_lower = vibe.lower()
         
-        # 1. Enhance the vibe for the AI
-        enhanced_vibe = vibe_lower
+# 1. Enhance the vibe for the AI
+        enhanced_vibe_parts = [vibe_lower]
         for slang, translation in OTAKU_DICTIONARY.items():
             if slang in vibe_lower:
-                enhanced_vibe += f" {slang} {translation}"
+                enhanced_vibe_parts.append(f"{slang} {translation}")
                 
+        enhanced_vibe = " ".join(enhanced_vibe_parts)
         # Prevent Vibe Dilution and token limit crashes
         if len(enhanced_vibe) > 1000:
             enhanced_vibe = enhanced_vibe[:1000]
@@ -257,8 +258,6 @@ async def get_recommendations(
             except (ValueError, TypeError):
                 mal_score = 5.0
 
-            # NEW DEBUG LINE: Let's see what the database is giving us
-            print(f"DEBUG -> Title: {anime.get('title')} | DB Score: {anime.get('score')} | Filter Set To: {min_score}")
 
             if min_score is not None and mal_score < min_score:
                 continue # Throw it out if the score is too low
