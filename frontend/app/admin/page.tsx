@@ -1,6 +1,7 @@
 import { Users, Activity, ShieldAlert, MoreVertical, MousePointer2 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
+import LiveUsersClient from "./LiveUsersClient";
 
 export const dynamic = 'force-dynamic';
 
@@ -35,7 +36,7 @@ export default async function AdminDashboard() {
     { count: searchCount }
   ] = await Promise.all([
     supabaseAdmin.auth.admin.listUsers(),
-    supabaseAdmin.from("page_views").select("session_id"),
+    supabaseAdmin.from("site_visits").select("visitor_id"), // Updated to site_visits
     supabaseAdmin.from("search_logs").select("*", { count: 'exact', head: true })
   ]);
   
@@ -57,7 +58,7 @@ export default async function AdminDashboard() {
   }).length;
 
   // Calculate unique visitors using a Set to filter out duplicate session IDs
-  const uniqueVisitors = new Set(viewsData?.map(v => v.session_id)).size;
+  const uniqueVisitors = new Set(viewsData?.map(v => v.visitor_id)).size; // Updated to visitor_id
   
   // Real search count from the database
   const totalSearches = searchCount || 0;
@@ -82,8 +83,11 @@ export default async function AdminDashboard() {
           </Link>
         </div>
 
-        {/* Top Stats Cards - Updated to a 4-column grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        {/* Top Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
+          
+          {/* Live WebSockets Client Component */}
+          <LiveUsersClient />
           
           <div className="bg-[#141414] border border-[#2E2E2E] rounded-2xl p-6 flex items-center gap-4">
             <div className="p-3 bg-[#3ECF8E]/10 rounded-xl text-[#3ECF8E]">
@@ -100,7 +104,7 @@ export default async function AdminDashboard() {
               <MousePointer2 size={28} />
             </div>
             <div>
-              <p className="text-[#8B909A] text-sm font-medium">Unique Visitors</p>
+              <p className="text-[#8B909A] text-sm font-medium">Total Visitors</p>
               <h2 className="text-3xl font-bold">{uniqueVisitors}</h2>
             </div>
           </div>
@@ -110,7 +114,7 @@ export default async function AdminDashboard() {
               <Activity size={28} />
             </div>
             <div>
-              <p className="text-[#8B909A] text-sm font-medium">Active Today</p>
+              <p className="text-[#8B909A] text-sm font-medium">Active Logins (24h)</p>
               <h2 className="text-3xl font-bold">{activeToday}</h2>
             </div>
           </div>
@@ -120,7 +124,7 @@ export default async function AdminDashboard() {
               <ShieldAlert size={28} />
             </div>
             <div>
-              <p className="text-[#8B909A] text-sm font-medium">Searches Run</p>
+              <p className="text-[#8B909A] text-sm font-medium">Total Searches</p>
               <h2 className="text-3xl font-bold">{totalSearches}</h2>
             </div>
           </div>

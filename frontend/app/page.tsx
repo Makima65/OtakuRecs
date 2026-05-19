@@ -96,44 +96,66 @@ export default function Home() {
     }
   };
 
-  // --- DEBUGGING LOGGER FOR VISITS (1-Minute Cooldown) ---
+  // --- SILENT BACKGROUND TRACKING FOR LIVE USERS & VISITS ---
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    // Don't track admins as visitors
+    if (localStorage.getItem("otaku_admin") === "true") {
+      console.log("Admin detected, skipping silent logs.");
+      return;
+    }
+
+    let visitorId = localStorage.getItem("visitor_id");
+    if (!visitorId) {
+      visitorId = crypto.randomUUID();
+      localStorage.setItem("visitor_id", visitorId);
+    }
+
+    const NOW = Date.now();
+    const COOLDOWN_MS = 60000; 
+    const lastVisitTime = localStorage.getItem("last_visit_timestamp");
+
+    // 1. Initial Visit Database Log
     const logVisit = async () => {
-      if (typeof window === 'undefined') return;
-      if (localStorage.getItem("otaku_admin") === "true") {
-        console.log("Admin detected, skipping log.");
-        return;
-      }
-
-      let visitorId = localStorage.getItem("visitor_id");
-      if (!visitorId) {
-        visitorId = crypto.randomUUID();
-        localStorage.setItem("visitor_id", visitorId);
-      }
-
-      const NOW = Date.now();
-      const COOLDOWN_MS = 60000; 
-      const lastVisitTime = localStorage.getItem("last_visit_timestamp");
-
       if (lastVisitTime && (NOW - parseInt(lastVisitTime)) < COOLDOWN_MS) {
-        console.log("Cooldown active. Seconds left:", Math.round((COOLDOWN_MS - (NOW - parseInt(lastVisitTime))) / 1000));
         return; 
       }
-
-      console.log("Attempting to log visit to Supabase...");
       
-      // We grab the specific error from Supabase here
       const { error } = await supabase.from('site_visits').insert({ visitor_id: visitorId });
-      
-      if (error) {
-        console.error("Supabase Error Blocked The Visit:", error.message, error.details, error.hint);
-      } else {
+      if (!error) {
         localStorage.setItem("last_visit_timestamp", NOW.toString());
-        console.log("Visit successfully recorded to database!");
       }
     };
-
     logVisit();
+
+    // 2. Silent Realtime Broadcast (so your admin page can see who is online)
+    const channel = supabase.channel('live_users', {
+      config: { presence: { key: visitorId } },
+    });
+
+    channel.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await channel.track({
+          visitor_id: visitorId,
+          status: 'browsing',
+          joined_at: new Date().toISOString(),
+        });
+      }
+    });
+
+    // 3. Silent Database Heartbeat (If you added a last_active column in Supabase)
+    const heartbeat = setInterval(async () => {
+      await supabase.from('site_visits').upsert(
+        { visitor_id: visitorId, last_active: new Date().toISOString() },
+        { onConflict: 'visitor_id' }
+      );
+    }, 30000); // Pings every 30 seconds
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(heartbeat);
+    };
   }, []);
 
   useEffect(() => {
