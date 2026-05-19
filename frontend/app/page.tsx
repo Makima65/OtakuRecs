@@ -101,6 +101,35 @@ export default function Home() {
   };
 
   useEffect(() => {
+    const logVisit = async () => {
+      if (typeof window === 'undefined') return;
+      
+      // Skip logging if you are the admin
+      if (localStorage.getItem("otaku_admin") === "true") return;
+
+      // Check if they already have an ID. If not, make one!
+      let visitorId = localStorage.getItem("visitor_id");
+      
+      if (!visitorId) {
+        visitorId = crypto.randomUUID(); // Generates a secure, random string
+        localStorage.setItem("visitor_id", visitorId);
+        
+        // Optional: Only log to database if they are a brand new visitor
+        // If you want to log EVERY page load, move this outside the 'if' block
+        try {
+          await supabase.from('site_visits').insert({ 
+            visitor_id: visitorId 
+          });
+        } catch (err) {
+          console.error("Visit log failed:", err);
+        }
+      }
+    };
+
+    logVisit();
+  }, []); // The empty array [] ensures this only runs once when the page loads
+
+  useEffect(() => {
     if (vibe === '' && searchMode !== 'browse') {
       setSearchMode('browse');
       setCurrentPage(1);
