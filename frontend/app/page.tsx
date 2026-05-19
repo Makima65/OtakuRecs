@@ -55,7 +55,6 @@ const ALL_GENRES = [
   { id: 79, name: "Video Game" },
   { id: 48, name: "Workplace" },
 ];
-// Sort the expanded list alphabetically so it's easy for users to read!
 ALL_GENRES.sort((a, b) => a.name.localeCompare(b.name));
 
 export default function Home() {
@@ -88,53 +87,54 @@ export default function Home() {
   const logSearch = async (query: string) => {
     if (!query.trim()) return;
     
-    // Check if user is admin (so we don't count our own searches in the dashboard)
     if (typeof window !== 'undefined' && localStorage.getItem("otaku_admin") === "true") return;
 
     try {
-      await supabase.from('search_logs').insert({ 
-        query: query.trim() 
-      });
+      await supabase.from('search_logs').insert({ query: query.trim() });
     } catch (err) {
       console.error("Analytics log failed:", err);
     }
   };
 
-  // --- UPDATED LOGGER FOR VISITS (1-Minute Cooldown) ---
+  // --- DEBUGGING LOGGER FOR VISITS (1-Minute Cooldown) ---
   useEffect(() => {
     const logVisit = async () => {
       if (typeof window === 'undefined') return;
-      if (localStorage.getItem("otaku_admin") === "true") return;
+      if (localStorage.getItem("otaku_admin") === "true") {
+        console.log("Admin detected, skipping log.");
+        return;
+      }
 
-      // 1. Ensure user has a persistent ID
       let visitorId = localStorage.getItem("visitor_id");
       if (!visitorId) {
         visitorId = crypto.randomUUID();
         localStorage.setItem("visitor_id", visitorId);
       }
 
-      // 2. Check the 1-minute cooldown
       const NOW = Date.now();
-      const COOLDOWN_MS = 60000; // 60 seconds in milliseconds
+      const COOLDOWN_MS = 60000; 
       const lastVisitTime = localStorage.getItem("last_visit_timestamp");
 
       if (lastVisitTime && (NOW - parseInt(lastVisitTime)) < COOLDOWN_MS) {
-        console.log("Visit ignored: 1-minute cooldown active.");
-        return; // Stop here, don't log to database
+        console.log("Cooldown active. Seconds left:", Math.round((COOLDOWN_MS - (NOW - parseInt(lastVisitTime))) / 1000));
+        return; 
       }
 
-      // 3. Log the visit to Supabase and update the timestamp
-      try {
-        await supabase.from('site_visits').insert({ visitor_id: visitorId });
+      console.log("Attempting to log visit to Supabase...");
+      
+      // We grab the specific error from Supabase here
+      const { error } = await supabase.from('site_visits').insert({ visitor_id: visitorId });
+      
+      if (error) {
+        console.error("Supabase Error Blocked The Visit:", error.message, error.details, error.hint);
+      } else {
         localStorage.setItem("last_visit_timestamp", NOW.toString());
-        console.log("Visit logged successfully!");
-      } catch (err) {
-        console.error("Visit log failed:", err);
+        console.log("Visit successfully recorded to database!");
       }
     };
 
     logVisit();
-  }, []); // The empty array [] ensures this only runs once when the page loads
+  }, []);
 
   useEffect(() => {
     if (vibe === '' && searchMode !== 'browse') {
@@ -163,7 +163,6 @@ export default function Home() {
       if (animeType) url += `&type=${animeType}`;
       if (animeStatus) url += `&status=${animeStatus}`;
       
-      // Only apply sorting if we are browsing. If searching by title, let Jikan sort by exact relevance!
       if (searchMode !== 'title') {
         if (sortBy === "members") {
           url += `&order_by=members&sort=desc`;
@@ -228,7 +227,6 @@ export default function Home() {
     setCurrentPage(1);
     setFetchTrigger(prev => prev + 1); 
     
-    // FIRE THE LOGGER HERE
     logSearch(vibe);
   };
 
@@ -244,7 +242,6 @@ export default function Home() {
     setSearchResults([]); 
     setApiError(null); 
 
-    // FIRE THE LOGGER HERE
     logSearch(vibe);
     
     try {
@@ -378,7 +375,6 @@ export default function Home() {
                   <h4 className="text-xs font-medium text-[#8B909A] mb-2 uppercase tracking-wider">Genres & Themes</h4>
                   <div className="flex flex-wrap gap-2">
                     
-                    {/* Dynamically render either Popular or All based on state */}
                     {(showAllGenres ? ALL_GENRES : POPULAR_GENRES).map((genre) => (
                       <button
                         key={genre.id}
@@ -393,7 +389,6 @@ export default function Home() {
                       </button>
                     ))}
 
-                    {/* The Toggle Button */}
                     <button
                       onClick={() => setShowAllGenres(!showAllGenres)}
                       className="px-3 py-1.5 text-xs font-medium rounded-md border border-dashed border-[#3E3E3E] bg-transparent text-[#8B909A] hover:border-[#3ECF8E] hover:text-[#3ECF8E] transition-colors"
@@ -467,7 +462,7 @@ export default function Home() {
               <div className="text-red-400 font-bold text-lg mb-2">MyAnimeList Database Offline</div>
               <p className="mb-4">{apiError}</p>
               <p className="text-[#A0A0A0]">
-                While the official database is temporarily down, try typing a vibe in the search bar and clicking <strong>AI Search</strong>! Your custom Pinecone AI database is still online and working perfectly.
+                While the official database is temporarily down, try typing a vibe in the search bar and clicking <strong>AI Search</strong>!
               </p>
             </div>
           ) : currentResults.length > 0 ? (
