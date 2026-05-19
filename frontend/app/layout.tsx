@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-// 1. Import your Navbar and Footer! 
+// 1. Import your UI components
 import Navbar from "@/components/Navbar"; 
-import Footer from "@/components/Footer"; // <-- NEW: Imported the Footer
+import Footer from "@/components/Footer"; 
+
+// 2. Import the Tracker we built!
+import AnalyticsTracker from "@/components/AnalyticsTracker"; 
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,7 +20,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OtakuRecs", // Updated from "Create Next App"
+  title: "OtakuRecs",
   description: "Your favorite anime character tracking app",
 };
 
@@ -31,18 +34,20 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      {/* 2. Added your dark theme colors to the body so it applies everywhere */}
       <body className="min-h-full flex flex-col bg-[#141414] text-[#EDEDED]">
         
-        {/* 3. The Navbar goes right here! It will now show on every page. */}
+        {/* 3. The Invisible Tracker 
+           This doesn't show anything on the screen, but it handles 
+           all the Supabase 'page_view' logic and your admin bypass.
+        */}
+        <AnalyticsTracker />
+
         <Navbar />
 
-        {/* 4. Wrap children in a main tag with flex-1 so your content fills the screen */}
         <main className="flex-1">
           {children}
         </main>
         
-        {/* 5. The Footer goes at the very bottom! */}
         <Footer />
         
       </body>
