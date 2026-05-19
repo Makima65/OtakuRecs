@@ -3,9 +3,9 @@ import { useState, useEffect } from 'react';
 import SearchBar from '@/components/SearchBar';
 import AnimeCard from '@/components/AnimeCard';
 import { LayoutGrid, ChevronLeft, ChevronRight } from "lucide-react"; 
-import { createClient } from "@supabase/supabase-js"; // <-- NEW IMPORT
+import { createClient } from "@supabase/supabase-js"; 
 
-// <-- NEW SUPABASE CLIENT SETUP
+// SUPABASE CLIENT SETUP
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -84,7 +84,7 @@ export default function Home() {
 
   const hasActiveFilters = selectedGenres.length > 0 || animeType !== '' || animeStatus !== '' || minScore !== 5.0 || !safeSearch;
 
-  // <-- NEW LOGGER FUNCTION
+  // LOGGER FUNCTION FOR SEARCHES
   const logSearch = async (query: string) => {
     if (!query.trim()) return;
     
@@ -100,29 +100,29 @@ export default function Home() {
     }
   };
 
+  // UPDATED LOGGER FOR VISITS (Handles Unique & Active Today)
   useEffect(() => {
     const logVisit = async () => {
       if (typeof window === 'undefined') return;
-      
-      // Skip logging if you are the admin
       if (localStorage.getItem("otaku_admin") === "true") return;
 
-      // Check if they already have an ID. If not, make one!
+      // 1. Ensure user has a persistent ID
       let visitorId = localStorage.getItem("visitor_id");
-      
       if (!visitorId) {
-        visitorId = crypto.randomUUID(); // Generates a secure, random string
+        visitorId = crypto.randomUUID();
         localStorage.setItem("visitor_id", visitorId);
-        
-        // Optional: Only log to database if they are a brand new visitor
-        // If you want to log EVERY page load, move this outside the 'if' block
-        try {
-          await supabase.from('site_visits').insert({ 
-            visitor_id: visitorId 
-          });
-        } catch (err) {
-          console.error("Visit log failed:", err);
-        }
+      }
+
+      // 2. Prevent logging every single refresh (Session-based throttling)
+      const hasLoggedThisSession = sessionStorage.getItem("visit_logged");
+      if (hasLoggedThisSession) return;
+
+      // 3. Log the visit to Supabase and mark this session as logged
+      try {
+        await supabase.from('site_visits').insert({ visitor_id: visitorId });
+        sessionStorage.setItem("visit_logged", "true");
+      } catch (err) {
+        console.error("Visit log failed:", err);
       }
     };
 
@@ -221,7 +221,7 @@ export default function Home() {
     setCurrentPage(1);
     setFetchTrigger(prev => prev + 1); 
     
-    // <-- FIRE THE LOGGER HERE
+    // FIRE THE LOGGER HERE
     logSearch(vibe);
   };
 
@@ -237,7 +237,7 @@ export default function Home() {
     setSearchResults([]); 
     setApiError(null); 
 
-    // <-- FIRE THE LOGGER HERE
+    // FIRE THE LOGGER HERE
     logSearch(vibe);
     
     try {
@@ -292,9 +292,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#111111] text-[#EDEDED] font-sans selection:bg-[#3ECF8E]/30">
       
-      {/* Drop in the cleanly separated Navbar */}
-      
-
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 sm:pt-10 pb-24">
         
         <div className="mb-6 max-w-2xl">
