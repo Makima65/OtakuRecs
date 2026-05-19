@@ -32,11 +32,11 @@ export default async function AdminDashboard() {
   // 2. Fetch all data from Supabase in parallel
   const [
     { data: authData, error: authError },
-    { data: viewsData },
+    { count: visitsCount }, // Tells Supabase to just grab the count
     { count: searchCount }
   ] = await Promise.all([
     supabaseAdmin.auth.admin.listUsers(),
-    supabaseAdmin.from("site_visits").select("visitor_id"), // Updated to site_visits
+    supabaseAdmin.from("site_visits").select("*", { count: 'exact', head: true }), // Count, don't download
     supabaseAdmin.from("search_logs").select("*", { count: 'exact', head: true })
   ]);
   
@@ -57,10 +57,10 @@ export default async function AdminDashboard() {
     return (now.getTime() - lastSignIn.getTime()) < 24 * 60 * 60 * 1000;
   }).length;
 
-  // Calculate unique visitors using a Set to filter out duplicate session IDs
-  const uniqueVisitors = new Set(viewsData?.map(v => v.visitor_id)).size; // Updated to visitor_id
+  // Real visits count straight from the database
+  const totalVisits = visitsCount || 0;
   
-  // Real search count from the database
+  // Real search count straight from the database
   const totalSearches = searchCount || 0;
 
   // For the table, let's grab the 10 most recent users
@@ -104,8 +104,8 @@ export default async function AdminDashboard() {
               <MousePointer2 size={28} />
             </div>
             <div>
-              <p className="text-[#8B909A] text-sm font-medium">Total Visitors</p>
-              <h2 className="text-3xl font-bold">{uniqueVisitors}</h2>
+              <p className="text-[#8B909A] text-sm font-medium">Total Visits</p>
+              <h2 className="text-3xl font-bold">{totalVisits}</h2>
             </div>
           </div>
 
