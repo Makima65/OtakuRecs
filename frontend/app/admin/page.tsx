@@ -2,6 +2,8 @@ import { Users, Activity, ShieldAlert, MoreVertical, MousePointer2 } from "lucid
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 
+export const dynamic = 'force-dynamic';
+
 // 1. Initialize the Supabase Admin Client
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
