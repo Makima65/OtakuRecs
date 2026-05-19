@@ -3,6 +3,13 @@ import { useState, useEffect } from 'react';
 import SearchBar from '@/components/SearchBar';
 import AnimeCard from '@/components/AnimeCard';
 import { LayoutGrid, ChevronLeft, ChevronRight } from "lucide-react"; 
+import { createClient } from "@supabase/supabase-js"; // <-- NEW IMPORT
+
+// <-- NEW SUPABASE CLIENT SETUP
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 const POPULAR_GENRES = [
   { id: 1, name: "Action" },
@@ -76,6 +83,22 @@ export default function Home() {
   const [fetchTrigger, setFetchTrigger] = useState(0);
 
   const hasActiveFilters = selectedGenres.length > 0 || animeType !== '' || animeStatus !== '' || minScore !== 5.0 || !safeSearch;
+
+  // <-- NEW LOGGER FUNCTION
+  const logSearch = async (query: string) => {
+    if (!query.trim()) return;
+    
+    // Check if user is admin (so we don't count our own searches in the dashboard)
+    if (typeof window !== 'undefined' && localStorage.getItem("otaku_admin") === "true") return;
+
+    try {
+      await supabase.from('search_logs').insert({ 
+        query: query.trim() 
+      });
+    } catch (err) {
+      console.error("Analytics log failed:", err);
+    }
+  };
 
   useEffect(() => {
     if (vibe === '' && searchMode !== 'browse') {
@@ -168,6 +191,9 @@ export default function Home() {
     setSearchMode('title');
     setCurrentPage(1);
     setFetchTrigger(prev => prev + 1); 
+    
+    // <-- FIRE THE LOGGER HERE
+    logSearch(vibe);
   };
 
   const searchVibe = async () => {
@@ -181,6 +207,9 @@ export default function Home() {
     setLoading(true);
     setSearchResults([]); 
     setApiError(null); 
+
+    // <-- FIRE THE LOGGER HERE
+    logSearch(vibe);
     
     try {
       let aiUrl = `${process.env.NEXT_PUBLIC_API_URL}/recommend?vibe=${encodeURIComponent(vibe)}&safe_search=${safeSearch}&min_score=${minScore}`;
