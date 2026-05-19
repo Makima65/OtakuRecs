@@ -100,7 +100,7 @@ export default function Home() {
     }
   };
 
-  // UPDATED LOGGER FOR VISITS (Handles Unique & Active Today)
+  // --- UPDATED LOGGER FOR VISITS (1-Minute Cooldown) ---
   useEffect(() => {
     const logVisit = async () => {
       if (typeof window === 'undefined') return;
@@ -113,14 +113,21 @@ export default function Home() {
         localStorage.setItem("visitor_id", visitorId);
       }
 
-      // 2. Prevent logging every single refresh (Session-based throttling)
-      const hasLoggedThisSession = sessionStorage.getItem("visit_logged");
-      if (hasLoggedThisSession) return;
+      // 2. Check the 1-minute cooldown
+      const NOW = Date.now();
+      const COOLDOWN_MS = 60000; // 60 seconds in milliseconds
+      const lastVisitTime = localStorage.getItem("last_visit_timestamp");
 
-      // 3. Log the visit to Supabase and mark this session as logged
+      if (lastVisitTime && (NOW - parseInt(lastVisitTime)) < COOLDOWN_MS) {
+        console.log("Visit ignored: 1-minute cooldown active.");
+        return; // Stop here, don't log to database
+      }
+
+      // 3. Log the visit to Supabase and update the timestamp
       try {
         await supabase.from('site_visits').insert({ visitor_id: visitorId });
-        sessionStorage.setItem("visit_logged", "true");
+        localStorage.setItem("last_visit_timestamp", NOW.toString());
+        console.log("Visit logged successfully!");
       } catch (err) {
         console.error("Visit log failed:", err);
       }
